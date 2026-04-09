@@ -1,0 +1,37 @@
+[project]
+name = "ai-restaurant-recommender"
+version = "0.1.0"
+description = "Phase 0 foundation for an AI-powered restaurant recommender."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "pydantic>=2.8.0",
+  "pydantic-settings>=2.4.0",
+  "uvicorn>=0.30.0",
+  "datasets>=3.1.0",
+  "pandas>=2.2.0",
+  "pyarrow>=18.0.0",
+  "groq",
+  "jinja2>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "ruff>=0.6.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+  "integration: tests that call external services (Groq) and require API keys",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

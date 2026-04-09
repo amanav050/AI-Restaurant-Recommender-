@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ app_name }}</title>
+    <style>
+      :root { --bg:#0b1220; --card:#111a2e; --text:#e9eefc; --muted:#aab6d6; --accent:#6ea8fe; --danger:#ff6b6b; }
+      body { 
+        margin:0; 
+        font-family: ui-sans-serif, system-ui, Segoe UI, Arial; 
+        background: linear-gradient(135deg, #0b1220 0%, #1a1f3a 50%, #2d1b69 100%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      .wrap { max-width: 980px; margin: 0 auto; padding: 28px 18px 60px; }
+      .header { display:flex; align-items:baseline; justify-content:space-between; gap: 12px; }
+      .title { font-size: 22px; font-weight: 700; }
+      .sub { color: var(--muted); font-size: 13px; }
+      .grid { display:grid; grid-template-columns: 1fr; gap: 14px; margin-top: 16px; }
+      @media (min-width: 900px) { .grid { grid-template-columns: 360px 1fr; } }
+      .card { 
+        background: rgba(17, 26, 46, 0.25);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      }
+      label { display:block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+      input, select, textarea {
+        width: 100%; box-sizing: border-box; padding: 10px 10px; border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.15); 
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: var(--text);
+        outline: none;
+        transition: all 0.3s ease;
+      }
+      input:focus, select:focus, textarea:focus {
+        border-color: var(--accent);
+        background: rgba(255,255,255,0.08);
+        box-shadow: 0 0 0 2px rgba(110, 168, 254, 0.2);
+      }
+      select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aab6d6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 16px;
+        padding-right: 40px;
+      }
+      select option {
+        background: var(--card);
+        color: var(--text);
+        padding: 8px;
+      }
+      textarea { min-height: 88px; resize: vertical; }
+      .row { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .btn {
+        display:inline-flex; align-items:center; justify-content:center; gap: 8px;
+        padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(110,168,254,0.15);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: var(--text); cursor: pointer; font-weight: 600;
+        transition: all 0.3s ease;
+      }
+      .btn:hover:not(:disabled) {
+        background: rgba(110,168,254,0.25);
+        border-color: var(--accent);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(110, 168, 254, 0.3);
+      }
+      .btn:disabled { opacity: .6; cursor: not-allowed; }
+      .err { color: var(--danger); font-size: 13px; white-space: pre-wrap; }
+      .meta { color: var(--muted); font-size: 12px; }
+      .rec { 
+        padding: 16px; 
+        border-radius: 16px; 
+        border: 1px solid rgba(255,255,255,0.1); 
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        margin-bottom: 16px;
+        box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .rec:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px 0 rgba(31, 38, 135, 0.3);
+      }
+      .rec h3 { margin: 0 0 6px; font-size: 15px; }
+      .pill { display:inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; color: var(--muted); border: 1px solid rgba(255,255,255,.10); margin-right: 6px; }
+      .explain { color: var(--text); font-size: 13px; line-height: 1.35; margin-top: 8px; }
+      .muted { color: var(--muted); }
+      .hr { height: 1px; background: rgba(255,255,255,.06); margin: 12px 0; }
+      .rec-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, rgba(17, 26, 46, 0.3), rgba(45, 27, 105, 0.3));
+        transition: opacity 0.3s ease;
+      }
+      .rec-image.loading {
+        opacity: 0.3;
+      }
+      .rec-image.loaded {
+        opacity: 1;
+      }
+      .rec-image.error {
+        display: none;
+      }
+      .image-placeholder {
+        width: 100%;
+        height: 120px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, rgba(17, 26, 46, 0.3), rgba(45, 27, 105, 0.3));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 14px;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+      .rec-content {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="header">
+        <div>
+          <div class="title">{{ app_name }}</div>
+          <div class="sub">End-to-end demo: Preferences -> Filter -> Groq LLM -> Recommendations</div>
+        </div>
+        <div class="meta">API: <span class="muted">{{ api_prefix }}</span></div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <form id="prefForm">
+            <div style="margin-bottom:10px">
+              <label for="location">Location (dataset locality)</label>
+              <select id="location" name="location" required>
+                <option value="">Select a location...</option>
+              </select>
+            </div>
+
+            <div class="row" style="margin-bottom:10px">
+              <div>
+                <label for="budget">Budget</label>
+                <select id="budget" name="budget">
+                  <option value="low">low</option>
+                  <option value="medium" selected>medium</option>
+                  <option value="high">high</option>
+                </select>
+              </div>
+              <div>
+                <label for="min_rating">Minimum rating</label>
+                <input id="min_rating" name="min_rating" type="number" step="0.1" min="0" max="5" value="4.2" />
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px">
+              <label for="cuisine">Cuisines</label>
+              <select id="cuisine" name="cuisine" multiple size="4">
+              </select>
+              <div class="meta" style="margin-top:4px">Hold Ctrl/Cmd to select multiple</div>
+            </div>
+
+            <div style="margin-bottom:12px">
+              <label for="additional_preferences">Additional preferences</label>
+              <textarea id="additional_preferences" name="additional_preferences" placeholder="e.g., Family-friendly, quick service"></textarea>
+            </div>
+
+            <button class="btn" id="submitBtn" type="submit">Get recommendations</button>
+            <div class="hr"></div>
+            <div class="meta">
+              Tip: This dataset uses locality names (e.g., <span class="muted">BTM</span>, <span class="muted">HSR</span>).
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap: 10px;">
+            <div style="font-weight:700">Results</div>
+            <div class="meta" id="status"></div>
+          </div>
+          <div class="hr"></div>
+          <div id="error" class="err" style="display:none"></div>
+          <div id="summary" class="meta" style="margin: 6px 0 12px;"></div>
+          <div id="results"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("prefForm");
+      const submitBtn = document.getElementById("submitBtn");
+      const resultsEl = document.getElementById("results");
+      const errorEl = document.getElementById("error");
+      const summaryEl = document.getElementById("summary");
+      const statusEl = document.getElementById("status");
+
+      async function loadLocalities() {
+        try {
+          const res = await fetch("{{ api_prefix }}/localities");
+          const localities = await res.json();
+          const select = document.getElementById("location");
+          localities.forEach(loc => {
+            const opt = document.createElement("option");
+            opt.value = loc;
+            opt.textContent = loc;
+            select.appendChild(opt);
+          });
+          // Set BTM as default if it exists
+          const btmOption = Array.from(select.options).find(opt => opt.value === "BTM");
+          if (btmOption) {
+            select.value = "BTM";
+          }
+        } catch (err) {
+          console.error("Failed to load localities", err);
+        }
+      }
+
+      async function loadCuisines() {
+        try {
+          const res = await fetch("{{ api_prefix }}/cuisines");
+          const cuisines = await res.json();
+          const select = document.getElementById("cuisine");
+          cuisines.forEach(c => {
+            const opt = document.createElement("option");
+            opt.value = c;
+            opt.textContent = c;
+            select.appendChild(opt);
+          });
+        } catch (err) {
+          console.error("Failed to load cuisines", err);
+        }
+      }
+      
+      // Load both localities and cuisines on page load
+      loadLocalities();
+      loadCuisines();
+
+      function setError(msg) {
+        if (!msg) { errorEl.style.display = "none"; errorEl.textContent = ""; return; }
+        errorEl.style.display = "block";
+        errorEl.textContent = msg;
+      }
+
+      function render(resp) {
+        summaryEl.textContent = resp.summary || "";
+        resultsEl.innerHTML = "";
+        
+        const recommendations = resp.recommendations || [];
+        
+        if (recommendations.length === 0) {
+          // Show friendly empty state message
+          const emptyEl = document.createElement("div");
+          emptyEl.className = "rec";
+          emptyEl.style.textAlign = "center";
+          emptyEl.style.padding = "40px 20px";
+          emptyEl.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 16px;">?</div>
+            <h3 style="margin: 0 0 8px; color: var(--text);">No restaurants found</h3>
+            <p style="margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4;">
+              No restaurants match your preferences. Try adjusting your filters:
+            </p>
+            <ul style="text-align: left; max-width: 300px; margin: 12px auto 0; color: var(--muted); font-size: 13px;">
+              <li>Choose a different location</li>
+              <li>Lower the minimum rating</li>
+              <li>Select fewer or different cuisines</li>
+              <li>Adjust the budget range</li>
+            </ul>
+          `;
+          resultsEl.appendChild(emptyEl);
+        } else {
+          // Show recommendations
+          for (const r of recommendations) {
+            const cuisines = (r.cuisines || []).map(c => `<span class="pill">${c}</span>`).join("");
+            const rating = (r.rating === null || r.rating === undefined) ? "" : `<span class="pill">? ${r.rating}</span>`;
+            const cost = (r.estimated_cost === null || r.estimated_cost === undefined) ? "" : `<span class="pill">? ${r.estimated_cost}</span>`;
+            
+            // Get the first cuisine for image, fallback to 'restaurant'
+            const primaryCuisine = (r.cuisines && r.cuisines.length > 0) ? r.cuisines[0] : 'restaurant';
+            
+            const el = document.createElement("div");
+            el.className = "rec";
+            
+            // Create image container with fallback
+            const imageContainer = document.createElement("div");
+            imageContainer.style.position = "relative";
+            imageContainer.style.marginBottom = "12px";
+            
+            // Create placeholder
+            const placeholder = document.createElement("div");
+            placeholder.className = "image-placeholder";
+            placeholder.innerHTML = `<div style="font-size: 24px; margin-bottom: 4px;">?</div><div>${primaryCuisine} Cuisine</div>`;
+            
+            // Create image with multiple fallback URLs
+            const img = document.createElement("img");
+            img.className = "rec-image loading";
+            img.alt = `${primaryCuisine} restaurant`;
+            
+            // Try multiple image sources in order of preference
+            const imageSources = [
+              `https://source.unsplash.com/400x200/?${encodeURIComponent(primaryCuisine)},restaurant&sig=${Math.random()}`,
+              `https://source.unsplash.com/400x200/?${encodeURIComponent(primaryCuisine)}&sig=${Math.random()}`,
+              `https://source.unsplash.com/400x200/?food,restaurant&sig=${Math.random()}`,
+              `https://picsum.photos/400/200?random=${Math.random()}`
+            ];
+            
+            let currentSourceIndex = 0;
+            
+            function tryNextSource() {
+              if (currentSourceIndex < imageSources.length) {
+                img.src = imageSources[currentSourceIndex];
+                currentSourceIndex++;
+              } else {
+                // All sources failed, show placeholder
+                img.style.display = 'none';
+                placeholder.style.display = 'flex';
+              }
+            }
+            
+            img.onload = function() {
+              img.className = "rec-image loaded";
+              placeholder.style.display = 'none';
+            };
+            
+            img.onerror = function() {
+              tryNextSource();
+            };
+            
+            // Start loading
+            tryNextSource();
+            
+            imageContainer.appendChild(img);
+            imageContainer.appendChild(placeholder);
+            
+            // Create content
+            const content = document.createElement("div");
+            content.className = "rec-content";
+            content.innerHTML = `
+              <h3>#${r.rank ?? ""} ${r.name}</h3>
+              <div>${cuisines} ${rating} ${cost}</div>
+              <div class="explain">${r.explanation}</div>
+            `;
+            
+            el.appendChild(imageContainer);
+            el.appendChild(content);
+            resultsEl.appendChild(el);
+          }
+        }
+        
+        if (resp.meta) {
+          statusEl.textContent = `model=${resp.meta.model} ? ${resp.meta.latency_ms}ms ? dataset=${resp.meta.dataset_version}`;
+        } else {
+          statusEl.textContent = "";
+        }
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setError("");
+        summaryEl.textContent = "";
+        resultsEl.innerHTML = "";
+        statusEl.textContent = "Loading...";
+        submitBtn.disabled = true;
+
+        const cuisineSelect = document.getElementById("cuisine");
+        const cuisine = Array.from(cuisineSelect.selectedOptions).map(opt => opt.value);
+
+        const payload = {
+          location: document.getElementById("location").value,
+          budget: document.getElementById("budget").value,
+          cuisine,
+          min_rating: Number(document.getElementById("min_rating").value || 0),
+          additional_preferences: document.getElementById("additional_preferences").value || null
+        };
+
+        try {
+          const res = await fetch("{{ api_prefix }}/recommendations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            // Check if this is a "no candidates found" error
+            if (data.error && data.error.code === "INTEGRATION_ERROR" && 
+                data.error.message.includes("No candidates found")) {
+              // Show friendly empty state instead of error
+              render({ recommendations: [], summary: "No restaurants match your preferences" });
+            } else {
+              setError(JSON.stringify(data, null, 2));
+              statusEl.textContent = "Error";
+            }
+            return;
+          }
+          render(data);
+        } catch (err) {
+          setError(String(err));
+          statusEl.textContent = "Error";
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
